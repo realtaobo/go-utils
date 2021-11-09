@@ -1,0 +1,38 @@
+{
+    "cls": [
+      {
+        "extra": "",
+        "md5": "abcdefg",
+        "url": "http://mirrors.tencent.com/package.tgz",
+        "version": "v1.1.1"
+      },
+      {
+        "extra": "default_version",
+        "md5": "abcdefg",
+        "url": "http://mirrors.tencent.com/package.tgz",
+        "version": "v1.1.2"
+      }
+    ],
+    "jaeger": [
+      {
+        "extra": "",
+        "md5": "abcdefg",
+        "url": "http://mirrors.tencent.com/package.tgz",
+        "version": "v1.1.1"
+      },
+      {
+        "extra": "default_version",
+        "md5": "abcdefg",
+        "url": "http://mirrors.tencent.com/package.tgz",
+        "version": "v1.1.2"
+      }
+    ],
+    "monitor": [
+      {
+        "extra": "default_version",
+        "md5": "abcdefg",
+        "url": "http://mirrors.tencent.com/package.tgz",
+        "version": "v1.1.2"
+      }
+    ]
+  }
