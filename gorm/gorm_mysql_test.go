@@ -9,12 +9,12 @@ import (
 )
 
 // 参考 https://github.com/go-sql-driver/mysql#dsn-data-source-name 获取详情
-var dsn string = "test:test1998@tcp(127.0.0.1:3306)/test"
+var dsn string = "root:abc123@tcp(127.0.0.1:3306)/test"
 
 type User struct {
-	// gorm.Model
+	gorm.Model
 	Ver string `gorm:"column:ver"`
-	Md5 string `gorm:"column:md5;primaryKey"`
+	Md5 string `gorm:"column:md5"`
 	Url string `gorm:"column:url"`
 }
 
@@ -183,5 +183,4 @@ func TestUpdate(t *testing.T) {
 	// db.Where("md5 = ?", 2).Take(&v1)
 	// db.Delete(&v1)
 	db.Where("md5 = ?", "4").Delete(&User{})
-
 }

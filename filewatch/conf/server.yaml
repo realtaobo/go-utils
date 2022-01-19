@@ -1,9 +1,0 @@
-port: "5005"
-configFile: "conf/agent.json"
-logFile: "log"
-TCCM:
-  reportIP: "***"
-  appId: 123
-  namespace: "123"
-  type: "line-protocol"
-  measurement: "123"
