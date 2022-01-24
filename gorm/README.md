@@ -1,8 +1,11 @@
 # 使用gorm操作mysql
 
-```go
-  "gorm.io/driver/mysql"
-  "gorm.io/gorm"
+```bash
+gorm
+    ├── README.md
+    ├── db.go   # gorm 操作 mysql 的相关接口封装
+    ├── db_test.go
+    └── docker-compose.yml  # 提供以 docker 方式快速搭建一个本地 msyql 服务的 docker-compose脚本
 ```
 
 ## 1 连接mysql

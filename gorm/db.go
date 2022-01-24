@@ -27,7 +27,7 @@ func GetDBConn(conf Database) *gorm.DB {
 	if db != nil {
 		return db
 	} else {
-		db, err := InitConn(conf)
+		db, err := InitConnection(conf)
 		if err != nil {
 			panic(err)
 		}
@@ -35,8 +35,8 @@ func GetDBConn(conf Database) *gorm.DB {
 	}
 }
 
-// 初始化链接 -- 方法一
-func InitConn(conf Database) (*gorm.DB, error) {
+// InitConnection 初始化mysql数据库链接 -- 方法一
+func InitConnection(conf Database) (*gorm.DB, error) {
 	path := strings.Join([]string{conf.UserName, ":", conf.Passwd, "@tcp(", conf.Host, ":", conf.Port, ")/", conf.DBName, "?charset=utf8&parseTime=true"}, "")
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       path,  // DSN data source name
@@ -52,7 +52,7 @@ func InitConn(conf Database) (*gorm.DB, error) {
 	return db, nil
 }
 
-// OpenConnection  -- 方法二
+// OpenConnection 初始化mysql数据库链接 -- 方法二
 func OpenConnection(dbConf Database) (db *gorm.DB, err error) {
 	dbDSN := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
@@ -76,6 +76,7 @@ func OpenConnection(dbConf Database) (db *gorm.DB, err error) {
 }
 
 // AutoMigrateTable 自动初始化表
+// table 类型应该为 &struct{}
 func AutoMigrateTable(db *gorm.DB, table interface{}) {
 	var err error
 	// 自动初始化数据表
@@ -85,13 +86,22 @@ func AutoMigrateTable(db *gorm.DB, table interface{}) {
 }
 
 // CreateOrUpdateTable 不存在时插入，存在时更新即可
-func CreateOrUpdateTable(db *gorm.DB, table interface{}) (err error) {
+// table 类型应该为 &struct{}
+func CreateOrUpdateTable(db *gorm.DB, table interface{}) error {
 	if sqlErr := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
 		UpdateAll: true,
 	}).Create(table).Error; sqlErr != nil {
-		log.Printf("db upsert ProjectUin failed, due to %v", sqlErr)
-		return fmt.Errorf("db upsert ProjectUin failed, due to %v", sqlErr)
+		return fmt.Errorf("db upsert table failed, due to %v", sqlErr)
+	}
+	return nil
+}
+
+// CreateTable 插入数据
+// table 类型应该为 &struct{}
+func CreateTable(db *gorm.DB, table interface{}) error {
+	if sqlErr := db.Create(table).Error; sqlErr != nil {
+		return fmt.Errorf("db insert table failed, due to %v", sqlErr)
 	}
 	return nil
 }
