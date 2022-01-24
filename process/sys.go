@@ -8,10 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
-
-	"golang.org/x/sys/unix"
 )
 
 // InitFunc
@@ -25,6 +22,8 @@ type ProcessInfo struct {
 	WorkDir  string
 }
 
+// TplWrite 通过模板变量values重写src文件
+// 替换src文件中的key变量,并生成新文件到dst
 func TplWrite(src, dst string, values map[string]string) error {
 	tplBs, err := ioutil.ReadFile(src)
 	if err != nil {
@@ -38,31 +37,7 @@ func TplWrite(src, dst string, values map[string]string) error {
 }
 
 // 回收进程
-func ReapProcess() {
-	cc := make(chan os.Signal, 1)
-	signal.Notify(cc, unix.SIGCHLD)
-	for range cc {
-		func() {
-			for {
-				var status unix.WaitStatus
-				pid, err := unix.Wait4(-1, &status, unix.WNOHANG, nil)
-				switch err {
-				case nil:
-					if pid > 0 {
-						continue
-					}
-					return
-				case unix.ECHILD:
-					return
-				case unix.EINTR:
-					continue
-				default:
-					return
-				}
-			}
-		}()
-	}
-}
+// 待寻找平台通用包
 
 func listProcess() map[string]bool {
 	ret := make(map[string]bool)
