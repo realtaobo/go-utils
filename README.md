@@ -1,32 +1,27 @@
 # go-utils
 
-| pkg| 说明|
-| :--- | :---: |
-|filewatch |对文件进行检测，当发现配置文件更改时调用自定义方法 |
-|gorm|gorm 模块的学习使用|
-
-## 提交规范
-
-每次提交，Commit message 都包括三个部分：Header，Body 和 Footer。
+## 代码结构说明
 
 ```bash
-<type>(<scope>): <subject>
-// 空一行
-<body>
-// 空一行
-<footer>
+# 各项详情详见子文件夹 README
+.
+├── README.md
+├── common  # 通用公共文件夹, 需完全独立
+├── gorm    # gorm 操作 mysql 的相关接口封装
+└── process # golang 操作系统相关接口实现
 ```
 
-其中，Header 是必需的，Body 和 Footer 可以省略。不管是哪一个部分，任何一行都不得超过72个字符（或100个字符）。这是为了避免自动换行影响美观。
+## 仓库规范
 
-其中，Header部分只有一行，包括三个字段：`type（必需）`、`scope（可选）`和`subject（必需）`。`type`用于说明 commit 的类别，只允许使用`feat、fix、docs、style、refactor、test、chore`7个标识。具体请参考：[Commit message 和 Change log 编写指南](https://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html)
+- 所有的 git 提交使用 [Commitizen](https://github.com/commitizen/cz-cli) 工具进行格式化提交信息
 
-### Commitizen
+- 保证包不会阻塞主程序的正常运行, 除系统错误以外, 包产生的错误需要返回给业务方，由业务进行错误处理
 
-[Commitizen](https://github.com/commitizen/cz-cli)是一个撰写合格 Commit message 的工具。
+- 如非必要, 包尽量不要产生日志输出
 
-```bash
-npm install -g commitizen cz-conventional-changelog
-echo '{ "path": "cz-conventional-changelog" }' >> ~/.czrc
-git cz #replace git commit
-```
+- 尽量包含单元测试
+  
+## 参考文章
+
+- [https://gorm.io/zh_CN/docs/index.html](https://gorm.io/zh_CN/docs/index.html)
+- [github.com/robfig/cron/v3](https://pkg.go.dev/github.com/robfig/cron/v3@v3.0.1#section-readme)
