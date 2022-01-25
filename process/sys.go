@@ -1,25 +1,19 @@
 package process
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-// InitFunc
-type InitFunc func() error
-
 // ProcessInfo 进程详情
 type ProcessInfo struct {
-	Path     string
-	Args     []string
-	InitFunc InitFunc
-	WorkDir  string
+	Path    string
+	Args    []string
+	WorkDir string
 }
 
 // TplWrite 通过模板变量values重写src文件
@@ -36,10 +30,23 @@ func TplWrite(src, dst string, values map[string]string) error {
 	return ioutil.WriteFile(dst, []byte(tpl), 0644)
 }
 
-// 回收进程
-// 待寻找平台通用包
+// 启动指定的单个进程
+func StartProcess(a *ProcessInfo) error {
+	cmd := exec.Command(a.Path, a.Args...)
+	if a.WorkDir != "" {
+		cmd.Dir = a.WorkDir
+	}
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("start process error %v", err)
+	} else {
+		log.Printf("start process successfully %s %v", a.Path, a.Args)
+	}
+	return nil
+}
 
-func listProcess() map[string]bool {
+// ListProcess 列出当前系统正在运行的进程, key为二进制文件的路径
+// 只适用于Linux操作系统
+func ListProcess() map[string]bool {
 	ret := make(map[string]bool)
 	files, err := ioutil.ReadDir("/proc")
 	if err != nil {
@@ -56,76 +63,18 @@ func listProcess() map[string]bool {
 	return ret
 }
 
-func startAgent(a *ProcessInfo) error {
-	cmd := exec.Command(a.Path, a.Args...)
-	if a.WorkDir != "" {
-		cmd.Dir = a.WorkDir
-	}
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("start process error %v", err)
-	} else {
-		log.Printf("start process successfully %s %v", a.Path, a.Args)
-	}
-	return nil
-}
-
-// CheckRestartAgent 如果agent进程不在则重启
-func CheckRestartAgent(aa []*ProcessInfo) error {
-	pList := listProcess()
+// CheckRestartProcess 如果指定的进程不存在则重启进程
+// 暂时只适用于linux操作系统
+func CheckRestartProcess(procs []*ProcessInfo) error {
+	pList := ListProcess()
 	var retErr error
-	for _, a := range aa {
-		if pList[a.Path] {
+	for _, proc := range procs {
+		if pList[proc.Path] {
 			continue
 		}
-		if err := startAgent(a); err != nil {
+		if err := StartProcess(proc); err != nil {
 			retErr = err
 		}
 	}
 	return retErr
-}
-
-type DataSource struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-	Msg  string `json:"message"`
-}
-
-// 创建数据源
-func CreateDataSource() error {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("reportMetrics panic, %v", err)
-		}
-	}()
-	url := "http://admin:admin@localhost:3000/api/datasources"
-	fmt.Println("url:>", url)
-	//json序列化
-	post := `
-	  {
-		"name":"Prometheus",
-		"type":"prometheus",
-		"url":"http://localhost:9090",
-		"access":"proxy",
-		"basicAuth":true
-      }
-	`
-
-	fmt.Println(url, "post", post)
-	var jsonStr = []byte(post)
-
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	// req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Println("status", resp.Status)
-	// fmt.Println("response:", resp.Header)
-	// body, _ := ioutil.ReadAll(resp.Body)
-	return nil
 }

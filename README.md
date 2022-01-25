@@ -18,7 +18,10 @@
 - 保证包不会阻塞主程序的正常运行, 除系统错误以外, 包产生的错误需要返回给业务方，由业务进行错误处理
 
 - 如非必要, 包尽量不要产生日志输出
+
+- 尽量包含单元测试
   
 ## 参考文章
 
-- [GORM 指南](https://gorm.io/zh_CN/docs/index.html)
+- [https://gorm.io/zh_CN/docs/index.html](https://gorm.io/zh_CN/docs/index.html)
+- [github.com/robfig/cron/v3](https://pkg.go.dev/github.com/robfig/cron/v3@v3.0.1#section-readme)
