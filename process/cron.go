@@ -20,12 +20,16 @@ type taskInfo struct {
 }
 
 /*
-RegisterTask 注册并启动定时任务
-默认支持分钟级定时任务, 注册秒级定时任务请设置 second 参数为 true
-taskName: 任务名称, 不允许重复
-schedule: schedule, 调度规则, 分钟级别是5位, 秒级是6位, 详见https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage
-如 "0/10 * * * *" 表示每小时的0,20,30,40,50分执行一次定时任务
+RegisterTask 注册并启动定时任务，
+默认支持分钟级定时任务，注册秒级定时任务请设置 second 参数为 true。
+
+taskName: 任务名称，不允许重复。
+
+schedule: schedule，调度规则，分钟级别是5位，秒级是6位，详见https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage。
+
 taskFunc: 用户指定的任务
+
+如 "0/10 * * * *" 表示每小时的0,20,30,40,50分执行一次定时任务。
 */
 func RegisterTask(taskName string, schedule string, taskFunc func(), second bool) error {
 	if _, ok := tasks[taskName]; ok {
@@ -50,7 +54,7 @@ func RegisterTask(taskName string, schedule string, taskFunc func(), second bool
 	return nil
 }
 
-// 取消定时任务
+// 取消定时任务。
 func CancelTask(taskName string) error {
 	if _, ok := tasks[taskName]; !ok {
 		return fmt.Errorf("no such task")

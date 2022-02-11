@@ -16,8 +16,8 @@ type ProcessInfo struct {
 	WorkDir string
 }
 
-// TplWrite 通过模板变量values重写src文件
-// 替换src文件中的key变量,并生成新文件到dst
+// 通过模板变量values重写src文件。
+// 替换src文件中的key变量，并生成新文件到dst。
 func TplWrite(src, dst string, values map[string]string) error {
 	tplBs, err := ioutil.ReadFile(src)
 	if err != nil {
@@ -30,7 +30,7 @@ func TplWrite(src, dst string, values map[string]string) error {
 	return ioutil.WriteFile(dst, []byte(tpl), 0644)
 }
 
-// 启动指定的单个进程
+// 启动指定的单个进程。
 func StartProcess(a *ProcessInfo) error {
 	cmd := exec.Command(a.Path, a.Args...)
 	if a.WorkDir != "" {
@@ -44,8 +44,8 @@ func StartProcess(a *ProcessInfo) error {
 	return nil
 }
 
-// ListProcess 列出当前系统正在运行的进程, key为二进制文件的路径
-// 只适用于Linux操作系统
+// 列出当前系统正在运行的进程，key为二进制文件的路径。
+// 只适用于Linux操作系统。
 func ListProcess() map[string]bool {
 	ret := make(map[string]bool)
 	files, err := ioutil.ReadDir("/proc")
@@ -63,8 +63,7 @@ func ListProcess() map[string]bool {
 	return ret
 }
 
-// CheckRestartProcess 如果指定的进程不存在则重启进程
-// 暂时只适用于linux操作系统
+// 如果指定的进程不存在则重启进程，暂时只适用于linux操作系统。
 func CheckRestartProcess(procs []*ProcessInfo) error {
 	pList := ListProcess()
 	var retErr error

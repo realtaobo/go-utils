@@ -89,3 +89,15 @@ func TestYamlToInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestCalcMonth(t *testing.T) {
+	t.Log(CalcMonth(202101, -1, -2)) // 201911
+	t.Log(CalcMonth(202101, -1, 0))  // 202001
+	t.Log(CalcMonth(202101, 0, -2))  // 202011
+}
+
+func TestCalcSubMonth(t *testing.T) {
+	t.Log(CalcSubMonth(202101, 202101)) // 1
+	t.Log(CalcSubMonth(202101, 202104)) // 4
+	t.Log(CalcSubMonth(202008, 202101)) // 6
+}
