@@ -105,3 +105,29 @@ func CreateTable(db *gorm.DB, table interface{}) error {
 	}
 	return nil
 }
+
+// GetTableBySpec 带where条件的查询语句
+// info 为 *[]TableStruct结构
+func GetTableBySpec(limit, page int, info, query interface{}, args ...interface{}) error {
+	if limit == 0 {
+		limit = 1000
+	}
+	offset := page * limit
+	if err := db.Where(query, args...).Limit(limit).Offset(offset).Find(info).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetTable 不带where条件的查询语句
+// info 为 *[]TableStruct结构
+func GetTable(limit, page int, info interface{}) error {
+	if limit == 0 {
+		limit = 1000
+	}
+	offset := page * limit
+	if err := db.Limit(limit).Offset(offset).Find(info).Error; err != nil {
+		return err
+	}
+	return nil
+}
