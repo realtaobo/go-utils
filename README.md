@@ -8,6 +8,7 @@
 ├── README.md
 ├── common  # 通用公共文件夹, 需完全独立
 ├── gorm    # gorm 操作 mysql 的相关接口封装
+├── log     # 对logrus的简单封装
 └── process # golang 操作系统相关接口实现
 ```
 
