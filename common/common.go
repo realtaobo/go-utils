@@ -10,6 +10,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	TimeFormat = "2006-01-02 15:04:05"
+)
+
 // 读取文件内容，返回类型为string。
 func ReadFile(path string) (string, error) {
 	content, err := ioutil.ReadFile(path)

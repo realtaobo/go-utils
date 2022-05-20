@@ -3,7 +3,6 @@ package gorm
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -11,9 +10,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var db *gorm.DB
-
-// 连接数据库的基本配置。
+// 连接数据库的基本配置
 type Database struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
@@ -22,37 +19,16 @@ type Database struct {
 	Passwd   string `yaml:"passwd"`
 }
 
-// 获取数据库连接句柄。
+// 获取数据库连接句柄
 func GetDBConn(conf Database) *gorm.DB {
-	if db != nil {
-		return db
-	} else {
-		db, err := InitConnection(conf)
-		if err != nil {
-			panic(err)
-		}
-		return db
-	}
-}
-
-// 初始化mysql数据库链接。 -- 方法一
-func InitConnection(conf Database) (*gorm.DB, error) {
-	path := strings.Join([]string{conf.UserName, ":", conf.Passwd, "@tcp(", conf.Host, ":", conf.Port, ")/", conf.DBName, "?charset=utf8&parseTime=true"}, "")
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN:                       path,  // DSN data source name
-		DefaultStringSize:         256,   // string 类型字段的默认长度
-		DisableDatetimePrecision:  true,  // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
-		DontSupportRenameIndex:    true,  // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
-		DontSupportRenameColumn:   true,  // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
-		SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
-	}))
+	db, err := OpenConnection(conf)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return db, nil
+	return db
 }
 
-// 初始化mysql数据库链接。 -- 方法二
+// 初始化mysql数据库链接
 func OpenConnection(dbConf Database) (db *gorm.DB, err error) {
 	dbDSN := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
@@ -71,8 +47,15 @@ func OpenConnection(dbConf Database) (db *gorm.DB, err error) {
 			time.Sleep(time.Second)
 		}
 	}
-	log.Println("success to connect database", dbDSN[strings.Index(dbDSN, `@`):])
 	return
+}
+
+// 执行原生sql语句
+func ExecRawSQL(db *gorm.DB, sql string, result interface{}, value ...interface{}) error {
+	if err := db.Raw(sql, value...).Scan(result).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 // 自动创建指定结构表。
@@ -85,18 +68,6 @@ func AutoMigrateTable(db *gorm.DB, table interface{}) {
 	}
 }
 
-// 表行不存在时插入行，存在时更新。
-// table 类型应该为 &struct{}。
-func CreateOrUpdateTable(db *gorm.DB, table interface{}) error {
-	if sqlErr := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "id"}},
-		UpdateAll: true,
-	}).Create(table).Error; sqlErr != nil {
-		return fmt.Errorf("db upsert table failed, due to %v", sqlErr)
-	}
-	return nil
-}
-
 // 插入数据。
 // table 类型应该为 &struct{}。
 func CreateTable(db *gorm.DB, table interface{}) error {
@@ -106,27 +77,50 @@ func CreateTable(db *gorm.DB, table interface{}) error {
 	return nil
 }
 
-// 带where条件的查询语句。
-// info 为 *[]TableStruct结构。
-func GetTableBySpec(limit, page int, info, query interface{}, args ...interface{}) error {
-	if limit == 0 {
-		limit = 1000
+// 获取某个查询语句的查询结果总数，适用于只获取结果数的场景
+func GetTableQueryTotal(db *gorm.DB, subquery string, value ...interface{}) (int64, error) {
+	sql := "select count(*) from (" + subquery + ") T"
+	var result int64
+	if err := db.Raw(sql, value...).Scan(&result).Error; err != nil {
+		return result, err
 	}
-	offset := page * limit
-	if err := db.Where(query, args...).Limit(limit).Offset(offset).Find(info).Error; err != nil {
+	return result, nil
+}
+
+// 向表中批量插入数据
+func CreateTableInBatches(db *gorm.DB, table interface{}, size int) error {
+	if sqlErr := db.CreateInBatches(table, size).Error; sqlErr != nil {
+		return fmt.Errorf("db insert table failed, due to %v", sqlErr)
+	}
+	return nil
+}
+
+// 表行不存在时插入行，存在时更新。
+// table 类型应该为 &struct{}。
+func CreateOrUpdateTable(db *gorm.DB, table interface{}) error {
+	if sqlErr := db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).CreateInBatches(table, 1000).Error; sqlErr != nil {
+		return fmt.Errorf("db upsert table failed, due to %v", sqlErr)
+	}
+	return nil
+}
+
+// 带where条件的查询语句。
+// result 为 *[]TableStruct结构
+// limit = -1表示不进行分页查询
+func GetTableBySpec(db *gorm.DB, limit, offset int, result, query interface{}, args ...interface{}) error {
+	if err := db.Where(query, args...).Limit(limit).Offset(offset).Find(result).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // 不带where条件的查询语句。
-// info 为 *[]TableStruct结构。
-func GetTable(limit, page int, info interface{}) error {
-	if limit == 0 {
-		limit = 1000
-	}
-	offset := page * limit
-	if err := db.Limit(limit).Offset(offset).Find(info).Error; err != nil {
+// result 为 *[]TableStruct结构
+// limit = -1表示不进行分页查询
+func GetTable(db *gorm.DB, limit, offset int, result interface{}) error {
+	if err := db.Limit(limit).Offset(offset).Find(result).Error; err != nil {
 		return err
 	}
 	return nil
