@@ -40,9 +40,9 @@ func CreateLogrusInstance(filePath string, size, backups, level int, local bool)
 	instance.SetFormatter(&log.JSONFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-			//处理文件名
 			fileName := path.Base(frame.File) + ":" + strconv.Itoa(frame.Line)
-			return frame.Function, fileName
+			functionName := path.Base(frame.Function)
+			return functionName, fileName
 		},
 	})
 	instance.SetReportCaller(true)

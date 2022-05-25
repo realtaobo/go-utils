@@ -58,16 +58,6 @@ func ExecRawSQL(db *gorm.DB, sql string, result interface{}, value ...interface{
 	return nil
 }
 
-// 自动创建指定结构表。
-// table 类型应该为 &struct{}。
-func AutoMigrateTable(db *gorm.DB, table interface{}) {
-	var err error
-	// 自动初始化数据表
-	if err = db.AutoMigrate(table); err != nil {
-		log.Fatalf("Failed to auto migrate ProjectMember, but got error %v", err)
-	}
-}
-
 // 插入数据。
 // table 类型应该为 &struct{}。
 func CreateTable(db *gorm.DB, table interface{}) error {
@@ -124,4 +114,24 @@ func GetTable(db *gorm.DB, limit, offset int, result interface{}) error {
 		return err
 	}
 	return nil
+}
+
+// 自动创建指定结构表。
+// table 类型应该为 &struct{}。
+func AutoMigrateTable(db *gorm.DB, table interface{}) error {
+	if err := db.AutoMigrate(table); err != nil {
+		return err
+	}
+	return nil
+}
+
+// 删除并重新创建表
+func ReCreateTable(db *gorm.DB, table interface{}) error {
+	// 若存在这样的表，则先删除
+	if db.Migrator().HasTable(table) {
+		if err := db.Migrator().DropTable(table); err != nil {
+			return err
+		}
+	}
+	return AutoMigrateTable(db, table)
 }
