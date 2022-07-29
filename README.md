@@ -23,8 +23,3 @@
 - 如非必要, 包尽量不要产生日志输出
 
 - 尽量包含单元测试
-  
-## 参考文章
-
-- [https://gorm.io/zh_CN/docs/index.html](https://gorm.io/zh_CN/docs/index.html)
-- [github.com/robfig/cron/v3](https://pkg.go.dev/github.com/robfig/cron/v3@v3.0.1#section-readme)
