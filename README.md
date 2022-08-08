@@ -16,6 +16,10 @@ The go-utils project aims to build a stupid golang pkg for myself.
 | **gorm**                              | ✔ | [gorm](https://github.com/go-gorm/gorm) Expansion pack
 | **log**                               | ✔ | [logrus](https://github.com/sirupsen/logrus) Expansion pack
 | **cron**                              | ✔ | [cron/v3](https://github.com/robfig/cron/v3) Expansion pack
+| **mutex**                             |
+| Mutex                                 | ✖ | [sync.Mutex](https://pkg.go.dev/sync#Mutex) Expansion pack
+| RecursiveMutex                        | ✔ | Implementation of reentrant lock
+| RecursiveMutexByToken                 | ✔ | Implementation of token-based reentrant lock
 
 ## 👋 Contributors
 
@@ -24,4 +28,3 @@ The go-utils project aims to build a stupid golang pkg for myself.
 - 保证包不会阻塞主程序的正常运行, 除系统错误以外, 包产生的错误需要返回给业务方，由业务进行错误处理
 
 - 如非必要, 包尽量不要产生日志输出
-
