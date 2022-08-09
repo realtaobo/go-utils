@@ -1,76 +1,46 @@
 package mutex
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
-
-	"github.com/petermattis/goid"
+	"unsafe"
 )
 
-// RecursiveMutex包装一个Mutex,实现可重入
-type RecursiveMutex struct {
+const (
+	// copy from /usr/local/go/src/sync/mutex.go
+	mutexLocked = 1 << iota // mutex is locked
+	mutexWoken
+	mutexStarving
+	mutexWaiterShift = iota
+)
+
+type Mutex struct {
 	sync.Mutex
-	owner     int64 //当前持有锁的goroutine id
-	recursion int32 // 当前goroutine 重入的次数
 }
 
-func (m *RecursiveMutex) Lock() {
-	gid := goid.Get() // 获取到当前goroutine的id
-	//如果当前持有锁的goroutine就是这次调用的goroutine,说明是重入
-	if atomic.LoadInt64(&m.owner) == gid {
-		m.recursion++
-		return
-	}
-	m.Mutex.Lock()
-	// 获得锁的goroutine第一次调用，记录下它的goroutine id
-	atomic.StoreInt64(&m.owner, gid)
-	m.recursion = 1
+// get mutex waiters at now
+func (m *Mutex) Count() int {
+	// get sync.Mutex.state filed
+	state := atomic.LoadInt32((*int32)(unsafe.Pointer(&m.Mutex)))
+	waiters := state >> mutexWaiterShift
+	waiters = waiters + (state & mutexLocked)
+	return int(waiters)
 }
 
-func (m *RecursiveMutex) Unlock() {
-	gid := goid.Get()
-	//非持有锁的goroutine尝试释放锁，错误的使用
-	if atomic.LoadInt64(&m.owner) != gid {
-		panic(fmt.Sprintf("wrong the owner(%d): %d!", m.owner, gid))
-	}
-	m.recursion--
-	if m.recursion != 0 {
-		return
-	}
-	// 此goroutine最后一次调用，需要释放锁
-	atomic.StoreInt64(&m.owner, -1)
-	m.Mutex.Unlock()
+// IsLocked 锁是否被持有
+func (m *Mutex) IsLocked() bool {
+	state := atomic.LoadInt32((*int32)(unsafe.Pointer(&m.Mutex)))
+	return state&mutexLocked == mutexLocked
 }
 
-// RecursiveMutexByToken包装一个Mutex,实现可重入
-type RecursiveMutexByToken struct {
-	sync.Mutex
-	token     int64 //存储加锁成功时goroutine传入的token值
-	recursion int32 // 当前goroutine 重入的次数
+// IsWoken 是否有等待者被唤醒
+func (m *Mutex) IsWoken() bool {
+	state := atomic.LoadInt32((*int32)(unsafe.Pointer(&m.Mutex)))
+	return state&mutexWoken == mutexWoken
 }
 
-func (m *RecursiveMutexByToken) Lock(token int64) {
-	if atomic.LoadInt64(&m.token) == token {
-		m.recursion++
-		return
-	}
-	m.Mutex.Lock()
-	atomic.StoreInt64(&m.token, token)
-	m.recursion = 1
+// IsStarving 锁是否处于饥饿状态
+func (m *Mutex) IsStarving() bool {
+	state := atomic.LoadInt32((*int32)(unsafe.Pointer(&m.Mutex)))
+	return state&mutexStarving == mutexStarving
 }
-
-func (m *RecursiveMutexByToken) Unlock(token int64) {
-	if atomic.LoadInt64(&m.token) != token {
-		panic(fmt.Sprintf("wrong the token(%d): %d!", m.token, token))
-	}
-	m.recursion--
-	if m.recursion != 0 {
-		return
-	}
-	atomic.StoreInt64(&m.token, 0)
-	m.Mutex.Unlock()
-}
-
-// TryLock 方法已在go1.18之后实现，此处不在添加
-// https://cs.opensource.google/go/go/+/refs/tags/go1.19:src/sync/mutex.go;l=98;bpv=0;bpt=1

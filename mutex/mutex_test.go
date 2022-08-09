@@ -1,12 +1,33 @@
 package mutex
 
 import (
+	"fmt"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-func TestRecursiveMutex(t *testing.T) {
+func TestMutex(t *testing.T) {
+	var mu Mutex
+	var wg sync.WaitGroup
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			mu.Lock()
+			time.Sleep(time.Second)
+			mu.Unlock()
+			wg.Done()
+		}()
+	}
+	time.Sleep(time.Second)
+	fmt.Printf("waitings: %d, isLocked: %t, IsWoken: %v, IsStarving: %v\n", mu.Count(), mu.IsLocked(), mu.IsWoken(), mu.IsStarving())
+	wg.Wait()
+	fmt.Printf("waitings: %d, isLocked: %t, IsWoken: %v, IsStarving: %v\n", mu.Count(), mu.IsLocked(), mu.IsWoken(), mu.IsStarving())
+}
+
+func TestRecursiveMutexNoToken(t *testing.T) {
 	mtx1 := RecursiveMutex{}
 	mtx1.Lock()
 	mtx1.Lock()
