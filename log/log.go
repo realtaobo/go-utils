@@ -33,7 +33,7 @@ func CreateLogrusInstance(filePath string, size, backups, level int, local bool)
 		MaxSize:    size,     // 日志文件最大 size, 单位是 MB
 		MaxBackups: backups,  // 最大过期日志保留的个数
 		MaxAge:     30,       // 保留过期文件的最大时间间隔,单位是天
-		Compress:   false,    // disabled by default
+		Compress:   false,    // default disabled
 		LocalTime:  local,
 	}
 	instance.SetOutput(logger)

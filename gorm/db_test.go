@@ -24,7 +24,6 @@ func TestGetDBConn(t *testing.T) {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
 		{
 			name: "TestGetDBConn1",
 			args: args{

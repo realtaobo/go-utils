@@ -16,7 +16,7 @@ The go-utils project aims to build a stupid golang pkg for myself.
 | **gorm**                              | ✔ | [gorm](https://github.com/go-gorm/gorm) Expansion pack
 | **log**                               | ✔ | [logrus](https://github.com/sirupsen/logrus) Expansion pack
 | **cron**                              | ✔ | [cron/v3](https://github.com/robfig/cron/v3) Expansion pack
-| **mutex**                             |
+| **sync**                             |
 | Mutex                                 | ✔ | [sync.Mutex](https://pkg.go.dev/sync#Mutex) Expansion pack
 | SpinLock                              | ✔ | Implementation of spin lock
 | RecursiveMutex                        | ✔ | Implementation of reentrant lock

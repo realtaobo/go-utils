@@ -125,7 +125,7 @@ func AutoMigrateTable(db *gorm.DB, table interface{}) error {
 	return nil
 }
 
-// 删除并重新创建表
+// 删除并重新创建表。
 func ReCreateTable(db *gorm.DB, table interface{}) error {
 	// 若存在这样的表，则先删除
 	if db.Migrator().HasTable(table) {

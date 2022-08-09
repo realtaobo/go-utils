@@ -21,7 +21,6 @@ func TestJsonToInterface(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "TestJsonToInterface1",
 			args: args{
