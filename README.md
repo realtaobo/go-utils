@@ -1,6 +1,7 @@
 # go-utils
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/tryturned/go-utils)](https://goreportcard.com/report/github.com/tryturned/go-utils)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tryturned/go-utils.svg)](https://pkg.go.dev/github.com/tryturned/go-utils)
 
 ## 🔮 Vision
 
