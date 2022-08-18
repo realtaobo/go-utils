@@ -1,6 +1,6 @@
 # go-utils
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tryturned/go-utils)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tryturned/go-utils)](https://goreportcard.com/report/github.com/tryturned/go-utils)
 
 ## 🔮 Vision
 
